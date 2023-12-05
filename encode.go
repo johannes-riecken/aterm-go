@@ -9,8 +9,7 @@ import (
 	"strings"
 )
 
-type Foo struct {
-}
+var seen = make(map[any]bool)
 
 func Marshal(x any) ([]byte, error) {
 	v := reflect.ValueOf(x)
@@ -65,6 +64,10 @@ func encodeWithFilter(b *bytes.Buffer, v reflect.Value, filter func(_ string, v 
 			return err2, used2
 		}
 	case reflect.Pointer:
+		if seen[v.Interface()] {
+			return nil, false
+		}
+		seen[v.Interface()] = true
 		return encodeWithFilter(b, v.Elem(), filter)
 	case reflect.Invalid:
 		b.WriteString("nil")
