@@ -86,6 +86,7 @@ func TestMarshalWithFilter(t *testing.T) {
 				},
 			},
 		}}}, want: []byte(`FieldList([Field([Ident("foo")]),Field([Ident("bar")])])`)},
+		{name: "map[string]int", args: args{x: map[string]int{"foo": 1, "bar": 2}}, want: []byte(`"{bar:=2,foo:=1}"`)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -96,22 +97,6 @@ func TestMarshalWithFilter(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("MarshalWithFilter() got = %s, want %s", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestAdd(t *testing.T) {
-	tests := []struct {
-		name string
-		want []byte
-	}{
-		{"single test", []byte("foobar")},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := Add(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Add() = %v, want %v", got, tt.want)
 			}
 		})
 	}

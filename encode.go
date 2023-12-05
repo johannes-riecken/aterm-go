@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -27,15 +28,6 @@ func MarshalWithFilter(x any, filter func(_ string, v reflect.Value) bool) ([]by
 		return nil, err
 	}
 	return buf.Bytes(), nil
-}
-
-func Add() []byte {
-	b := bytes.NewBuffer([]byte("foo"))
-	b2 := bytes.NewBuffer(b.Bytes()[:len(b.Bytes())-1])
-	b2.WriteByte('b')
-	b2.WriteByte('a')
-	b2.WriteByte('r')
-	return b2.Bytes()
 }
 
 func encodeWithFilter(b *bytes.Buffer, v reflect.Value, filter func(_ string, v reflect.Value) bool) (err error, used bool) {
@@ -73,10 +65,39 @@ func encodeWithFilter(b *bytes.Buffer, v reflect.Value, filter func(_ string, v 
 		b.WriteString("nil")
 	case reflect.Interface:
 		return encodeWithFilter(b, v.Elem(), filter)
+	case reflect.Map:
+		err2, used2 := encodeMap(b, v, filter)
+		if err2 != nil {
+			return err2, used2
+		}
 	default:
 		panic("unsupported type: " + v.Kind().String())
 	}
 	return nil, true
+}
+
+func encodeMap(b *bytes.Buffer, v reflect.Value, filter func(_ string, v reflect.Value) bool) (error, bool) {
+	b.WriteString(`"{`)
+	keys := v.MapKeys()
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i].String() < keys[j].String()
+	})
+	for i := 0; i < len(keys); i++ {
+		if i > 0 {
+			b.WriteByte(',')
+		}
+		b.WriteString(keys[i].String())
+		b.WriteString(":=")
+		err2, used2 := encodeWithFilter(b, v.MapIndex(keys[i]), filter)
+		if err2 != nil {
+			return err2, true
+		}
+		if !used2 {
+			b.Truncate(len(b.Bytes()) - 1)
+		}
+	}
+	b.WriteString(`}"`)
+	return nil, false
 }
 
 func encodeStruct(b *bytes.Buffer, v reflect.Value, filter func(_ string, v reflect.Value) bool) (error, bool) {
