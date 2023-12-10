@@ -2,6 +2,7 @@ package aterm_go
 
 import (
 	"bytes"
+	"fmt"
 	"go/ast"
 	"go/token"
 	"reflect"
@@ -38,8 +39,12 @@ func encodeWithFilter(b *bytes.Buffer, v reflect.Value, filter func(_ string, v 
 	case reflect.String:
 		b.WriteString(strconv.Quote(v.Interface().(string)))
 	case reflect.Int:
-		x := strconv.Itoa(int(v.Int()))
-		b.WriteString(x)
+		if v.Type().String() != "int" {
+			b.WriteString(fmt.Sprintf("%q", v.Interface()))
+		} else {
+			x := strconv.Itoa(int(v.Int()))
+			b.WriteString(x)
+		}
 	case reflect.Slice:
 		iEnd := v.Len()
 		parenChars := []byte("[]")
@@ -77,6 +82,7 @@ func encodeWithFilter(b *bytes.Buffer, v reflect.Value, filter func(_ string, v 
 }
 
 func encodeMap(b *bytes.Buffer, v reflect.Value, filter func(_ string, v reflect.Value) bool) (error, bool) {
+	origLen := len(b.Bytes())
 	b.WriteString(`"{`)
 	keys := v.MapKeys()
 	sort.Slice(keys, func(i, j int) bool {
@@ -93,10 +99,12 @@ func encodeMap(b *bytes.Buffer, v reflect.Value, filter func(_ string, v reflect
 			return err2, true
 		}
 		if !used2 {
-			b.Truncate(len(b.Bytes()) - 1)
+			b.Truncate(origLen)
 		}
 	}
-	b.WriteString(`}"`)
+	if b.Len() > origLen {
+		b.WriteString(`}"`)
+	}
 	return nil, false
 }
 
