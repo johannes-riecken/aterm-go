@@ -32,7 +32,7 @@ func MarshalWithFilter(x any, filter func(_ string, v reflect.Value) bool) ([]by
 }
 
 func encodeWithFilter(b *bytes.Buffer, v reflect.Value, filter func(_ string, v reflect.Value) bool) (err error, used bool) {
-	if !filter("", v) {
+	if filter != nil && !filter("", v) {
 		return nil, false
 	}
 	switch v.Kind() {
@@ -146,50 +146,8 @@ func encodeCommaSeparated(b *bytes.Buffer, v reflect.Value, filter func(_ string
 }
 
 func encode(b *bytes.Buffer, v reflect.Value) error {
-	switch v.Kind() {
-	case reflect.String:
-		b.WriteString(strconv.Quote(v.Interface().(string)))
-	case reflect.Int:
-		x := strconv.Itoa(int(v.Int()))
-		b.WriteString(x)
-	case reflect.Slice:
-		b.WriteByte('[')
-		for i := 0; i < v.Len(); i++ {
-			if i > 0 {
-				b.WriteByte(',')
-			}
-			if err := encode(b, v.Index(i)); err != nil {
-				return err
-			}
-		}
-		b.WriteByte(']')
-	case reflect.Struct:
-		// we can't use `typ := v.Type().String()[len(v.Type().PkgPath())+1:]`
-		// because PkgPath() is the full path, not just the package name
-		// better solution:
-		pkgPath := v.Type().PkgPath()
-		// only keep the last part of the path
-		pkgPath = pkgPath[strings.LastIndex(pkgPath, "/")+1:]
-		typ := v.Type().String()[len(pkgPath)+1:]
-		b.WriteString(typ)
-		b.WriteByte('(')
-		for i := 0; i < v.NumField(); i++ {
-			if i > 0 {
-				b.WriteByte(',')
-			}
-			encode(b, v.Field(i))
-		}
-		b.WriteByte(')')
-	case reflect.Pointer:
-		return encode(b, v.Elem())
-	case reflect.Invalid:
-		b.WriteString("nil")
-	case reflect.Interface:
-		return encode(b, v.Elem())
-	default:
-		panic("unsupported type: " + v.Kind().String())
-	}
-	return nil
+	err, _ := encodeWithFilter(b, v, nil)
+	return err
 }
 
 var NotPosInfoFilter ast.FieldFilter = func(name string, value reflect.Value) bool {
