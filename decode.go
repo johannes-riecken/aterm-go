@@ -55,7 +55,12 @@ func read(lex *lexer, v reflect.Value) error {
 		lex.next()
 	case scanner.Int:
 		i, _ := strconv.Atoi(lex.text())
-		v.SetInt(int64(i))
+		// v might be a pointer
+		if v.Kind() == reflect.Ptr {
+			v.Set(reflect.ValueOf(&i))
+		} else {
+			v.SetInt(int64(i))
+		}
 		lex.next()
 	case '[':
 		lex.next()

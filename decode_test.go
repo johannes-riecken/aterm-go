@@ -1,6 +1,7 @@
 package aterm_go
 
 import (
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"reflect"
 	"testing"
 )
@@ -19,12 +20,14 @@ func TestUnmarshal(t *testing.T) {
 		{name: "int", args: args{data: []byte(`42`)}, want: 42},
 		{name: "[]int", args: args{data: []byte(`[1,2,3]`)}, want: []int{1, 2, 3}},
 		{name: "Point", args: args{data: []byte(`Point(1,2)`)}, want: Point{1, 2}},
+		{name: "Point3D", args: args{data: []byte(`Point3D(1,2,3)`)}, want: Point3D{to.Ptr(1), to.Ptr(2), to.Ptr(3)}},
 	}
 
 	var out0 string
 	var out1 int
 	var out2 []int
 	var out3 Point
+	var out4 Point3D
 
 	t.Run(tests[0].name, func(t *testing.T) {
 		if err := Unmarshal(tests[0].args.data, &out0); (err != nil) != tests[0].wantErr {
@@ -59,6 +62,15 @@ func TestUnmarshal(t *testing.T) {
 		}
 		if !reflect.DeepEqual(out3, tests[3].want) {
 			t.Errorf("Unmarshal() got = %v, want %v", out3, tests[3].want)
+		}
+	})
+
+	t.Run(tests[4].name, func(t *testing.T) {
+		if err := Unmarshal(tests[4].args.data, &out4); (err != nil) != tests[4].wantErr {
+			t.Fatalf("Unmarshal() error = %v, wantErr %v", err, tests[4].wantErr)
+		}
+		if !reflect.DeepEqual(out4, tests[4].want) {
+			t.Errorf("Unmarshal() got = %v, want %v", out4, tests[4].want)
 		}
 	})
 

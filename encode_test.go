@@ -1,6 +1,7 @@
 package aterm_go
 
 import (
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"go/ast"
 	"reflect"
 	"testing"
@@ -53,11 +54,6 @@ type Point3D struct {
 	X, Y, Z *int
 }
 
-// copied from azcore
-func Ptr[T any](v T) *T {
-	return &v
-}
-
 func TestMarshalWithFilter(t *testing.T) {
 	type args struct {
 		x any
@@ -69,7 +65,7 @@ func TestMarshalWithFilter(t *testing.T) {
 		wantErr bool
 	}{
 		{name: "Ident", args: args{x: ast.Ident{Name: "Foo"}}, want: []byte(`Ident("Foo")`)},
-		{name: "struct with non-adjacent initialized fields", args: args{x: Point3D{X: Ptr[int](1), Z: Ptr[int](3)}}, want: []byte(`Point3D(1,3)`)},
+		{name: "struct with non-adjacent initialized fields", args: args{x: Point3D{X: to.Ptr(1), Z: to.Ptr(3)}}, want: []byte(`Point3D(1,3)`)},
 		{name: "failing", args: args{x: ast.FieldList{List: []*ast.Field{
 			{
 				Names: []*ast.Ident{
