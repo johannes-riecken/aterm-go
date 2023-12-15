@@ -86,6 +86,8 @@ func read(lex *lexer, v reflect.Value) error {
 		if err != nil {
 			return err
 		}
+	default:
+		panic("unhandled default case")
 	}
 	return nil
 }
@@ -102,6 +104,8 @@ func readList(lex *lexer, v reflect.Value) error {
 		if err != nil {
 			return err
 		}
+	default:
+		panic("assertion error")
 	}
 	return nil
 }
