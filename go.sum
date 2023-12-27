@@ -1,0 +1,6 @@
+github.com/Azure/azure-sdk-for-go/sdk/azcore v1.9.1 h1:lGlwhPtrX6EVml1hO0ivjkUxsSyl4dsiw9qcA1k/3IQ=
+github.com/Azure/azure-sdk-for-go/sdk/azcore v1.9.1/go.mod h1:RKUqNu35KJYcVG/fqTRqmuXJZYNhYkBrnC/hX7yGbTA=
+github.com/palantir/goastwriter v0.27.0 h1:83FyL+t5ySeYvwAYM/HWfdTQemHG8WG1QZ5auKOytFE=
+github.com/palantir/goastwriter v0.27.0/go.mod h1:YypLfpEtZGrjqIMOWvDil+z0O76+FIByYYKUBMuQRVU=
+golang.org/x/text v0.14.0 h1:ScX5w1eTa3QqT8oi6+ziP7dTV1S2+ALU0bI+0zXKWiQ=
+golang.org/x/text v0.14.0/go.mod h1:18ZOQIKpY8NJVqYksKHtTdi31H5itFRjB5/qKTNYzSU=
