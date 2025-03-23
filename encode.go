@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"reflect"
 	"sort"
 	"strconv"
@@ -75,6 +77,11 @@ func encodeWithFilter(b *bytes.Buffer, v reflect.Value, filter func(_ string, v 
 		if err2 != nil {
 			return err2, used2
 		}
+	case reflect.Bool:
+		// using golang.org/x/text/cases
+		// strings.Title is replaced by the following code:
+		// cases.Title(cases.Lower().String(v.Bool()))
+		b.WriteString(cases.Title(language.English).String(strconv.FormatBool(v.Bool())))
 	default:
 		panic("unsupported type: " + v.Kind().String())
 	}

@@ -75,3 +75,41 @@ func TestUnmarshal(t *testing.T) {
 	})
 
 }
+
+func TestUnmarshalWithSkips(t *testing.T) {
+	type args struct {
+		data  []byte
+		skips map[string][]int
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    any
+		wantErr bool
+	}{
+		{name: "no skips", args: args{data: []byte(`Point3D(1,2,3)`), skips: map[string][]int{}}, want: Point3D{X: to.Ptr(1), Y: to.Ptr(2), Z: to.Ptr(3)}},
+		{name: "struct with non-adjacent initialized fields", args: args{data: []byte(`Point3D(1,3)`), skips: map[string][]int{"Point3D": {1}}}, want: Point3D{X: to.Ptr(1), Z: to.Ptr(3)}},
+	}
+
+	var out0 Point3D
+	var out1 Point3D
+
+	t.Run(tests[0].name, func(t *testing.T) {
+		if err := UnmarshalWithSkips(tests[0].args.data, &out0, tests[0].args.skips); (err != nil) != tests[0].wantErr {
+			t.Errorf("UnmarshalWithSkips() error = %v, wantErr %v", err, tests[0].wantErr)
+		}
+		if !reflect.DeepEqual(out0, tests[0].want) {
+			t.Errorf("Unmarshal() got = %v, want %v", out0, tests[0].want)
+		}
+	})
+
+	t.Run(tests[1].name, func(t *testing.T) {
+		if err := UnmarshalWithSkips(tests[1].args.data, &out1, tests[1].args.skips); (err != nil) != tests[1].wantErr {
+			t.Errorf("UnmarshalWithSkips() error = %v, wantErr %v", err, tests[1].wantErr)
+		}
+		if !reflect.DeepEqual(out1, tests[1].want) {
+			t.Errorf("Unmarshal() got = %v, want %v", out1, tests[1].want)
+		}
+	})
+
+}

@@ -19,6 +19,9 @@ type OptPoint struct {
 	X, Y *int
 }
 
+type Empty struct {
+}
+
 func TestMarshal(t *testing.T) {
 	type args struct {
 		x any
@@ -32,6 +35,7 @@ func TestMarshal(t *testing.T) {
 		{name: "string", args: args{x: "foo"}, want: []byte(`"foo"`)},
 		{name: "int", args: args{x: 42}, want: []byte(`42`)},
 		{name: "[]int", args: args{x: []int{1, 2, 3}}, want: []byte(`[1,2,3]`)},
+		{name: "Empty", args: args{x: Empty{}}, want: []byte(`Empty()`)},
 		{name: "Point", args: args{x: Point{1, 2}}, want: []byte(`Point(1,2)`)},
 		{name: "Nested", args: args{x: Nested{Point: &Point{1, 2}}}, want: []byte(`Nested(Point(1,2))`)},
 		{name: "OptPoint", args: args{x: OptPoint{X: new(int), Y: new(int)}}, want: []byte(`OptPoint(0,0)`)},
