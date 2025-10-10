@@ -1,9 +1,12 @@
 package aterm_go
 
 import (
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"reflect"
 	"testing"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUnmarshal(t *testing.T) {
@@ -85,7 +88,7 @@ func TestUnmarshalWithSkips(t *testing.T) {
 		name    string
 		args    args
 		want    any
-		wantErr bool
+		wantErr error
 	}{
 		{name: "no skips", args: args{data: []byte(`Point3D(1,2,3)`), skips: map[string][]int{}}, want: Point3D{X: to.Ptr(1), Y: to.Ptr(2), Z: to.Ptr(3)}},
 		{name: "struct with non-adjacent initialized fields", args: args{data: []byte(`Point3D(1,3)`), skips: map[string][]int{"Point3D": {1}}}, want: Point3D{X: to.Ptr(1), Z: to.Ptr(3)}},
@@ -95,21 +98,17 @@ func TestUnmarshalWithSkips(t *testing.T) {
 	var out1 Point3D
 
 	t.Run(tests[0].name, func(t *testing.T) {
-		if err := UnmarshalWithSkips(tests[0].args.data, &out0, tests[0].args.skips); (err != nil) != tests[0].wantErr {
-			t.Errorf("UnmarshalWithSkips() error = %v, wantErr %v", err, tests[0].wantErr)
-		}
+		err := UnmarshalWithSkips(tests[0].args.data, &out0, tests[0].args.skips)
+		assert.ErrorIs(t, err, tests[0].wantErr)
 		if !reflect.DeepEqual(out0, tests[0].want) {
 			t.Errorf("Unmarshal() got = %v, want %v", out0, tests[0].want)
 		}
 	})
 
 	t.Run(tests[1].name, func(t *testing.T) {
-		if err := UnmarshalWithSkips(tests[1].args.data, &out1, tests[1].args.skips); (err != nil) != tests[1].wantErr {
-			t.Errorf("UnmarshalWithSkips() error = %v, wantErr %v", err, tests[1].wantErr)
-		}
-		if !reflect.DeepEqual(out1, tests[1].want) {
-			t.Errorf("Unmarshal() got = %v, want %v", out1, tests[1].want)
-		}
+		err := UnmarshalWithSkips(tests[1].args.data, &out1, tests[1].args.skips)
+		assert.ErrorIs(t, err, tests[1].wantErr)
+		assert.Equal(t, tests[1].want, out1)
 	})
 
 }

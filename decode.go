@@ -110,19 +110,22 @@ func readListWithSkips(lex *lexer, v reflect.Value, skips map[string][]int) erro
 }
 
 func readStructWithSkips(lex *lexer, v reflect.Value, skips map[string][]int) error {
+	skipComma := false
+FieldLoop:
 	for i := 0; !lex.endStruct(); i++ {
-		if i > 0 {
+		if i > 0 && !skipComma {
 			err := lex.consume(',')
 			if err != nil {
 				return err
 			}
+			skipComma = false
 		}
-		currentSkips := skips[v.Type().Field(i).Name]
-		if len(currentSkips) > 0 {
-			for _, skip := range currentSkips {
-				if skip == i {
-					continue
-				}
+		currentSkips := skips[v.Type().Name()]
+		for _, skip := range currentSkips {
+			// unconsuming the comma would be nicer
+			if skip == i {
+				skipComma = true
+				continue FieldLoop
 			}
 		}
 		err := readWithSkips(lex, v.FieldByIndex([]int{i}), skips)
