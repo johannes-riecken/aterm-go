@@ -3,14 +3,15 @@ package main
 import (
 	aterm_go "aterm-go"
 	"fmt"
-	"github.com/palantir/goastwriter/astgen"
-	"github.com/palantir/goastwriter/decl"
-	"github.com/palantir/goastwriter/expression"
-	"github.com/palantir/goastwriter/statement"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"log"
+
+	"github.com/palantir/goastwriter/astgen"
+	"github.com/palantir/goastwriter/decl"
+	"github.com/palantir/goastwriter/expression"
+	"github.com/palantir/goastwriter/statement"
 )
 
 func main() {
